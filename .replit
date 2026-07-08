@@ -13,23 +13,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "API Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Start application"
-
-[[workflows.workflow]]
-name = "API Server"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd nursery-inventory-system/nursery-inventory-system/artifacts/api-server && export NODE_ENV=development && pnpm run prisma:generate && pnpm run build && PORT=8080 SESSION_SECRET=$SESSION_SECRET DATABASE_URL=$DATABASE_URL node --enable-source-maps ./dist/index.mjs"
-waitForPort = 8080
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "Start application"

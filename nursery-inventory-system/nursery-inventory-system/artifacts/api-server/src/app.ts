@@ -56,8 +56,10 @@ app.use(
 );
 
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Raised from the default 100kb so base64-encoded logo/photo uploads
+// (Settings module) fit within a single JSON request body.
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use("/api", router);
 

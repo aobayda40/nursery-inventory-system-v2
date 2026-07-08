@@ -5,6 +5,7 @@ import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter, Redirect } from 'wouter';
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppShell } from '@/components/layout/AppShell';
 import LoginPage from '@/pages/login';
@@ -44,36 +45,38 @@ function Router() {
       {/* All protected routes share the AppShell */}
       <Route>
         <ProtectedRoute>
-          <AppShell>
-            <Switch>
-              <Route path="/" component={Dashboard} />
-              <Route path="/plant-master" component={PlantMaster} />
-              <Route path="/inventory" component={Inventory} />
-              <Route path="/inventory/:id" component={InventoryDetail} />
-              <Route path="/purchased-plants" component={PurchasedPlants} />
-              <Route path="/production" component={Production} />
-              <Route path="/projects" component={ProjectsPage} />
-              <Route path="/projects/:id/history" component={ProjectHistoryPage} />
-              <Route path="/plant-issue" component={PlantIssuePage} />
-              <Route path="/plant-issue/:id" component={PlantIssueDetailPage} />
-              <Route path="/material-master" component={MaterialMasterPage} />
-              <Route path="/material-purchase" component={MaterialPurchasePage} />
-              <Route path="/reports" component={Reports} />
-              <Route path="/settings" component={Settings} />
-              <Route path="/profile" component={ProfilePage} />
-              <Route path="/users">
-                <ProtectedRoute roles={['Administrator', 'Manager']}>
-                  <UsersPage />
-                </ProtectedRoute>
-              </Route>
-              <Route path="/audit-logs">
-                <ProtectedRoute roles={['Administrator', 'Manager']}>
-                  <AuditLogsPage />
-                </ProtectedRoute>
-              </Route>
-              <Route component={NotFound} />
-            </Switch>
-          </AppShell>
+          <SettingsProvider>
+            <AppShell>
+              <Switch>
+                <Route path="/" component={Dashboard} />
+                <Route path="/plant-master" component={PlantMaster} />
+                <Route path="/inventory" component={Inventory} />
+                <Route path="/inventory/:id" component={InventoryDetail} />
+                <Route path="/purchased-plants" component={PurchasedPlants} />
+                <Route path="/production" component={Production} />
+                <Route path="/projects" component={ProjectsPage} />
+                <Route path="/projects/:id/history" component={ProjectHistoryPage} />
+                <Route path="/plant-issue" component={PlantIssuePage} />
+                <Route path="/plant-issue/:id" component={PlantIssueDetailPage} />
+                <Route path="/material-master" component={MaterialMasterPage} />
+                <Route path="/material-purchase" component={MaterialPurchasePage} />
+                <Route path="/reports" component={Reports} />
+                <Route path="/settings" component={Settings} />
+                <Route path="/profile" component={ProfilePage} />
+                <Route path="/users">
+                  <ProtectedRoute roles={['Administrator', 'Manager']}>
+                    <UsersPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route path="/audit-logs">
+                  <ProtectedRoute roles={['Administrator', 'Manager']}>
+                    <AuditLogsPage />
+                  </ProtectedRoute>
+                </Route>
+                <Route component={NotFound} />
+              </Switch>
+            </AppShell>
+          </SettingsProvider>
         </ProtectedRoute>
       </Route>
     </Switch>

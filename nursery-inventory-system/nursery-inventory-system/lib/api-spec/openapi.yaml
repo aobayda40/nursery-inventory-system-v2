@@ -36,6 +36,8 @@ tags:
     description: Material purchase operations
   - name: material-inventory
     description: Material inventory stock level operations
+  - name: settings
+    description: Application settings operations
 
 paths:
   # ── Auth ──────────────────────────────────────────────────────────────────
@@ -266,6 +268,100 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Settings ──────────────────────────────────────────────────────────────
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get all application settings as a key/value map
+      responses:
+        "200":
+          description: Settings map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsMap"
+
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Bulk upsert application settings (Administrator/Manager only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsMap"
+      responses:
+        "200":
+          description: Updated settings map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsMap"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /settings/export:
+    get:
+      operationId: exportSettings
+      tags: [settings]
+      summary: Export all settings as a downloadable backup snapshot (Administrator/Manager only)
+      responses:
+        "200":
+          description: Backup snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsBackup"
+        "403":
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /settings/import:
+    post:
+      operationId: importSettings
+      tags: [settings]
+      summary: Import settings from a backup snapshot (Administrator/Manager only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsMap"
+      responses:
+        "200":
+          description: Imported settings map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SettingsMap"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
 
   # ── Plant Master ──────────────────────────────────────────────────────────
   /plants:
@@ -1401,6 +1497,22 @@ components:
       properties:
         error:
           type: string
+
+    SettingsMap:
+      type: object
+      description: Flat key/value map of setting keys to string values.
+      additionalProperties:
+        type: string
+
+    SettingsBackup:
+      type: object
+      required: [exportedAt, settings]
+      properties:
+        exportedAt:
+          type: string
+          format: date-time
+        settings:
+          $ref: "#/components/schemas/SettingsMap"
 
     # ── Plant Master schemas ─────────────────────────────────────────────────
     Plant:

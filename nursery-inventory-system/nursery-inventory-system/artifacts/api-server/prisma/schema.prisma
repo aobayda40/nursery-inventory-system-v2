@@ -263,3 +263,11 @@ model MaterialMovement {
   movementDate   DateTime       @db.Date
   createdAt      DateTime       @default(now())
 }
+
+// ── Settings ────────────────────────────────────────────────────────────────
+// Simple key/value store so new settings can be added without migrations.
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

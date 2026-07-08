@@ -1,12 +1,5 @@
-import { PlaceholderPage } from "@/components/layout/PlaceholderPage";
-import { Settings } from "lucide-react";
+import { Settings } from "@/features/settings/Settings";
 
 export default function SettingsPage() {
-  return (
-    <PlaceholderPage 
-      title="System Settings"
-      description="Manage user access, nursery locations, and system-wide configurations."
-      icon={Settings}
-    />
-  );
+  return <Settings />;
 }

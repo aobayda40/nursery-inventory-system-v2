@@ -13,6 +13,16 @@ export interface ApiError {
   error: string;
 }
 
+/**
+ * Flat key/value map of setting keys to string values.
+ */
+export interface SettingsMap {[key: string]: string}
+
+export interface SettingsBackup {
+  exportedAt: string;
+  settings: SettingsMap;
+}
+
 export interface Plant {
   id: number;
   plantCode: string;

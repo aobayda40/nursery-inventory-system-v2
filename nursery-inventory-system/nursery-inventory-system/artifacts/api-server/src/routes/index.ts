@@ -16,6 +16,7 @@ import materialMastersRouter from "./material-masters";
 import materialPurchasesRouter from "./material-purchases";
 import materialInventoryRouter from "./material-inventory";
 import availableMaterialPurchasesRouter from "./available-material-purchases";
+import settingsRouter from "./settings";
 
 const router: IRouter = Router();
 
@@ -40,5 +41,6 @@ router.use(materialMastersRouter);
 router.use(materialPurchasesRouter);
 router.use(materialInventoryRouter);
 router.use(availableMaterialPurchasesRouter);
+router.use(settingsRouter);
 
 export default router;

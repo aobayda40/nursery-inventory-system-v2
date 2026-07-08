@@ -197,6 +197,37 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Get all application settings as a key/value map
+ */
+export const GetSettingsResponse = zod.record(zod.string(), zod.string()).describe('Flat key\/value map of setting keys to string values.')
+
+
+/**
+ * @summary Bulk upsert application settings (Administrator/Manager only)
+ */
+export const UpdateSettingsBody = zod.record(zod.string(), zod.string()).describe('Flat key\/value map of setting keys to string values.')
+
+export const UpdateSettingsResponse = zod.record(zod.string(), zod.string()).describe('Flat key\/value map of setting keys to string values.')
+
+
+/**
+ * @summary Export all settings as a downloadable backup snapshot (Administrator/Manager only)
+ */
+export const ExportSettingsResponse = zod.object({
+  "exportedAt": zod.coerce.date(),
+  "settings": zod.record(zod.string(), zod.string()).describe('Flat key\/value map of setting keys to string values.')
+})
+
+
+/**
+ * @summary Import settings from a backup snapshot (Administrator/Manager only)
+ */
+export const ImportSettingsBody = zod.record(zod.string(), zod.string()).describe('Flat key\/value map of setting keys to string values.')
+
+export const ImportSettingsResponse = zod.record(zod.string(), zod.string()).describe('Flat key\/value map of setting keys to string values.')
+
+
+/**
  * @summary List all plants
  */
 export const ListPlantsQueryParams = zod.object({

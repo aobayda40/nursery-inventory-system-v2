@@ -75,6 +75,8 @@ export * from './project';
 export * from './projectHistory';
 export * from './projectInput';
 export * from './projectUpdate';
+export * from './settingsBackup';
+export * from './settingsMap';
 export * from './topProjectUsage';
 export * from './user';
 export * from './userInput';
