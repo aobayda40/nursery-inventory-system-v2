@@ -1,0 +1,1 @@
+- [Auth & RBAC](auth-implementation.md) — JWT httpOnly cookie auth; global requireAuth at router level; Prisma config needs datasource.url for db push

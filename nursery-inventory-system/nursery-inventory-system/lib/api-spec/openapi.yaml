@@ -1,0 +1,2370 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User management operations
+  - name: audit-logs
+    description: Audit log operations
+  - name: plants
+    description: Plant Master operations
+  - name: plant-batches
+    description: Purchased plant batch operations
+  - name: production-batches
+    description: Production batch (grafting) operations
+  - name: projects
+    description: Project master operations
+  - name: plant-issues
+    description: Plant issue (project stock issuance) operations
+  - name: inventory
+    description: Inventory stock level operations
+  - name: dashboard
+    description: Dashboard summary operations
+  - name: material-masters
+    description: Material Master CRUD operations
+  - name: material-purchases
+    description: Material purchase operations
+  - name: material-inventory
+    description: Material inventory stock level operations
+
+paths:
+  # ── Auth ──────────────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message: { type: string }
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get currently authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Users ─────────────────────────────────────────────────────────────────
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get a user by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: User record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    put:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Audit Logs ────────────────────────────────────────────────────────────
+  /audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [audit-logs]
+      summary: List audit log entries
+      parameters:
+        - in: query
+          name: userId
+          schema: { type: integer }
+        - in: query
+          name: entity
+          schema: { type: string }
+        - in: query
+          name: action
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50 }
+        - in: query
+          name: offset
+          schema: { type: integer, default: 0 }
+      responses:
+        "200":
+          description: Audit log page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogPage"
+
+
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ── Plant Master ──────────────────────────────────────────────────────────
+  /plants:
+    get:
+      operationId: listPlants
+      tags: [plants]
+      summary: List all plants
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: plantType
+          schema: { type: string }
+        - in: query
+          name: potSize
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of plants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plant"
+
+    post:
+      operationId: createPlant
+      tags: [plants]
+      summary: Create a plant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlantInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Plant"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /plants/{id}:
+    get:
+      operationId: getPlant
+      tags: [plants]
+      summary: Get a plant
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Plant record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Plant"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    put:
+      operationId: updatePlant
+      tags: [plants]
+      summary: Update a plant
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlantUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Plant"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    delete:
+      operationId: deletePlant
+      tags: [plants]
+      summary: Delete a plant
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Plant Batches ─────────────────────────────────────────────────────────
+  /plant-batches:
+    get:
+      operationId: listPlantBatches
+      tags: [plant-batches]
+      summary: List all plant batches
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+          description: Search across batchNumber, supplier, plant name
+        - in: query
+          name: plantId
+          schema: { type: integer }
+        - in: query
+          name: nurseryLocation
+          schema: { type: string }
+        - in: query
+          name: supplier
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of batches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlantBatch"
+
+    post:
+      operationId: createPlantBatch
+      tags: [plant-batches]
+      summary: Create a plant batch (purchase)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlantBatchInput"
+      responses:
+        "201":
+          description: Created batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantBatch"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Batch number already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /plant-batches/{id}:
+    get:
+      operationId: getPlantBatch
+      tags: [plant-batches]
+      summary: Get a plant batch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Batch record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantBatch"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    put:
+      operationId: updatePlantBatch
+      tags: [plant-batches]
+      summary: Update a plant batch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlantBatchUpdate"
+      responses:
+        "200":
+          description: Updated batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantBatch"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    delete:
+      operationId: deletePlantBatch
+      tags: [plant-batches]
+      summary: Delete a plant batch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Production Batches ───────────────────────────────────────────────────────
+  /production-batches:
+    get:
+      operationId: listProductionBatches
+      tags: [production-batches]
+      summary: List all production batches
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+          description: Search across productionBatchNumber, productionType, plant name
+        - in: query
+          name: plantId
+          schema: { type: integer }
+        - in: query
+          name: nurseryLocation
+          schema: { type: string }
+        - in: query
+          name: productionType
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of production batches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductionBatch"
+
+    post:
+      operationId: createProductionBatch
+      tags: [production-batches]
+      summary: Create a production batch (grafting run)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionBatchInput"
+      responses:
+        "201":
+          description: Created production batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionBatch"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Production batch number already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /production-batches/{id}:
+    get:
+      operationId: getProductionBatch
+      tags: [production-batches]
+      summary: Get a production batch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Production batch record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionBatch"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    put:
+      operationId: updateProductionBatch
+      tags: [production-batches]
+      summary: Update a production batch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductionBatchUpdate"
+      responses:
+        "200":
+          description: Updated production batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionBatch"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Production batch number already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    delete:
+      operationId: deleteProductionBatch
+      tags: [production-batches]
+      summary: Delete a production batch
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Projects ──────────────────────────────────────────────────────────────
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all projects
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: status
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Project code already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Project record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    put:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update a project
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Project code already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete a project
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Project has issue history and cannot be deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /projects/{id}/history:
+    get:
+      operationId: getProjectHistory
+      tags: [projects]
+      summary: Get the full plant-issue history for a project
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Project issue history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectHistory"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Available batches (for issuing) ──────────────────────────────────────
+  # ── Inventory Items ───────────────────────────────────────────────────────
+  /inventory-items:
+    get:
+      operationId: listInventoryItems
+      tags: [inventory]
+      summary: List current inventory items with stock levels and computed costs
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: plantId
+          schema: { type: integer }
+        - in: query
+          name: nurseryLocation
+          schema: { type: string }
+        - in: query
+          name: sortBy
+          schema: { type: string, enum: [stock_asc, stock_desc] }
+      responses:
+        "200":
+          description: List of inventory items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+
+  /inventory-items/{id}:
+    get:
+      operationId: getInventoryItem
+      tags: [inventory]
+      summary: Get a single inventory item with batch breakdown
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Inventory item detail with batch breakdown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryDetail"
+
+  /inventory-items/{id}/movements:
+    get:
+      operationId: listInventoryMovements
+      tags: [inventory]
+      summary: Paginated inventory movement ledger for one item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: type
+          schema: { type: string }
+        - in: query
+          name: dateFrom
+          schema: { type: string, format: date }
+        - in: query
+          name: dateTo
+          schema: { type: string, format: date }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Paginated list of inventory movements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedInventoryMovements"
+
+  /inventory-items/{id}/movements/export:
+    get:
+      operationId: exportInventoryMovements
+      tags: [inventory]
+      summary: Export movement ledger as CSV
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: type
+          schema: { type: string }
+        - in: query
+          name: dateFrom
+          schema: { type: string, format: date }
+        - in: query
+          name: dateTo
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: CSV file download
+          content:
+            text/csv:
+              schema: { type: string }
+
+  /available-batches:
+    get:
+      operationId: listAvailableBatches
+      tags: [plant-issues]
+      summary: List batches with remaining stock, optionally filtered by plant/location
+      parameters:
+        - in: query
+          name: plantId
+          schema: { type: integer }
+        - in: query
+          name: nurseryLocation
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of available batches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailableBatch"
+
+  # ── Plant Issues ──────────────────────────────────────────────────────────
+  /plant-issues:
+    get:
+      operationId: listPlantIssues
+      tags: [plant-issues]
+      summary: List all plant issues
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: projectId
+          schema: { type: integer }
+      responses:
+        "200":
+          description: List of plant issues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlantIssue"
+
+    post:
+      operationId: createPlantIssue
+      tags: [plant-issues]
+      summary: Create a plant issue (issue stock to a project)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlantIssueInput"
+      responses:
+        "201":
+          description: Created plant issue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantIssue"
+        "400":
+          description: Validation error or insufficient stock
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /plant-issues/{id}:
+    get:
+      operationId: getPlantIssue
+      tags: [plant-issues]
+      summary: Get a plant issue
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Plant issue record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlantIssue"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Material Masters ──────────────────────────────────────────────────────
+  /material-masters/categories:
+    get:
+      operationId: listMaterialCategories
+      tags: [material-masters]
+      summary: List all material categories
+      responses:
+        "200":
+          description: List of category strings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+
+  /material-masters:
+    get:
+      operationId: listMaterialMasters
+      tags: [material-masters]
+      summary: List all materials
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of materials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MaterialMaster"
+
+    post:
+      operationId: createMaterialMaster
+      tags: [material-masters]
+      summary: Create a material
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaterialMasterInput"
+      responses:
+        "201":
+          description: Created material
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaterialMaster"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /material-masters/{id}:
+    get:
+      operationId: getMaterialMaster
+      tags: [material-masters]
+      summary: Get a material by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Material record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaterialMaster"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    put:
+      operationId: updateMaterialMaster
+      tags: [material-masters]
+      summary: Update a material
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaterialMasterUpdate"
+      responses:
+        "200":
+          description: Updated material
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaterialMaster"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+    delete:
+      operationId: deleteMaterialMaster
+      tags: [material-masters]
+      summary: Delete a material
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Material has history and cannot be deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Material Purchases ─────────────────────────────────────────────────────
+  /material-purchases:
+    get:
+      operationId: listMaterialPurchases
+      tags: [material-purchases]
+      summary: List all material purchases
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: materialId
+          schema: { type: integer }
+        - in: query
+          name: stockLocation
+          schema: { type: string }
+        - in: query
+          name: supplier
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of material purchases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MaterialPurchase"
+
+    post:
+      operationId: createMaterialPurchase
+      tags: [material-purchases]
+      summary: Create a material purchase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MaterialPurchaseInput"
+      responses:
+        "201":
+          description: Created material purchase
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaterialPurchase"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /material-purchases/{id}:
+    get:
+      operationId: getMaterialPurchase
+      tags: [material-purchases]
+      summary: Get a material purchase by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Material purchase record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaterialPurchase"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  # ── Material Inventory ─────────────────────────────────────────────────────
+  /material-inventory:
+    get:
+      operationId: listMaterialInventory
+      tags: [material-inventory]
+      summary: List material inventory stock levels
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: materialId
+          schema: { type: integer }
+        - in: query
+          name: stockLocation
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of material inventory items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MaterialInventoryItem"
+
+  /material-inventory/{id}:
+    get:
+      operationId: getMaterialInventoryItem
+      tags: [material-inventory]
+      summary: Get a material inventory item with purchase breakdown
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Material inventory item detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MaterialInventoryDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /material-inventory/{id}/movements:
+    get:
+      operationId: listMaterialMovements
+      tags: [material-inventory]
+      summary: Paginated material movement ledger for one item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: type
+          schema: { type: string }
+        - in: query
+          name: dateFrom
+          schema: { type: string, format: date }
+        - in: query
+          name: dateTo
+          schema: { type: string, format: date }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: Paginated list of material movements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedMaterialMovements"
+
+  # ── Available Material Batches (for issuing) ───────────────────────────────
+  /available-material-purchases:
+    get:
+      operationId: listAvailableMaterialPurchases
+      tags: [material-purchases]
+      summary: List material purchases with remaining stock
+      parameters:
+        - in: query
+          name: materialId
+          schema: { type: integer }
+        - in: query
+          name: stockLocation
+          schema: { type: string }
+      responses:
+        "200":
+          description: List of available material purchases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailableMaterialPurchase"
+
+  # ── Dashboard ─────────────────────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary metrics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    ApiError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    # ── Plant Master schemas ─────────────────────────────────────────────────
+    Plant:
+      type: object
+      required: [id, plantCode, botanicalName, commonName, category, plantType, potSize, createdAt, updatedAt]
+      properties:
+        id:           { type: integer }
+        plantCode:    { type: string }
+        botanicalName: { type: string }
+        commonName:   { type: string }
+        category:     { type: string }
+        plantType:    { type: string }
+        potSize:      { type: string }
+        imageUrl:     { type: ["string", "null"] }
+        createdAt:    { type: string, format: date-time }
+        updatedAt:    { type: string, format: date-time }
+
+    PlantInput:
+      type: object
+      required: [plantCode, botanicalName, commonName, category, plantType, potSize]
+      properties:
+        plantCode:    { type: string, minLength: 1 }
+        botanicalName: { type: string, minLength: 1 }
+        commonName:   { type: string, minLength: 1 }
+        category:     { type: string, minLength: 1 }
+        plantType:    { type: string, minLength: 1 }
+        potSize:      { type: string, minLength: 1 }
+        imageUrl:     { type: ["string", "null"] }
+
+    PlantUpdate:
+      type: object
+      properties:
+        plantCode:    { type: string, minLength: 1 }
+        botanicalName: { type: string, minLength: 1 }
+        commonName:   { type: string, minLength: 1 }
+        category:     { type: string, minLength: 1 }
+        plantType:    { type: string, minLength: 1 }
+        potSize:      { type: string, minLength: 1 }
+        imageUrl:     { type: ["string", "null"] }
+
+    # ── Plant Batch schemas ──────────────────────────────────────────────────
+    PlantBatchPlant:
+      type: object
+      required: [id, plantCode, commonName, botanicalName, potSize]
+      properties:
+        id:           { type: integer }
+        plantCode:    { type: string }
+        commonName:   { type: string }
+        botanicalName: { type: string }
+        potSize:      { type: string }
+        imageUrl:     { type: ["string", "null"] }
+
+    PlantBatch:
+      type: object
+      required:
+        - id
+        - batchNumber
+        - supplier
+        - plantId
+        - plant
+        - potSize
+        - quantityPurchased
+        - purchasePricePerPlant
+        - transportationCost
+        - otherCosts
+        - totalBatchCost
+        - costPerPlant
+        - purchaseDate
+        - currentQuantity
+        - nurseryLocation
+        - createdAt
+        - updatedAt
+      properties:
+        id:                    { type: integer }
+        batchNumber:           { type: string }
+        supplier:              { type: string }
+        plantId:               { type: integer }
+        plant:
+          $ref: "#/components/schemas/PlantBatchPlant"
+        potSize:               { type: string }
+        quantityPurchased:     { type: integer }
+        purchasePricePerPlant: { type: number }
+        transportationCost:    { type: number }
+        otherCosts:            { type: number }
+        totalBatchCost:        { type: number }
+        costPerPlant:          { type: number }
+        purchaseDate:          { type: string, format: date }
+        currentQuantity:       { type: integer }
+        nurseryLocation:       { type: string }
+        createdAt:             { type: string, format: date-time }
+        updatedAt:             { type: string, format: date-time }
+
+    PlantBatchInput:
+      type: object
+      required:
+        - supplier
+        - plantId
+        - potSize
+        - quantityPurchased
+        - purchasePricePerPlant
+        - purchaseDate
+        - nurseryLocation
+      properties:
+        batchNumber:           { type: string }
+        supplier:              { type: string, minLength: 1 }
+        plantId:               { type: integer }
+        potSize:               { type: string, minLength: 1 }
+        quantityPurchased:     { type: integer, minimum: 1 }
+        purchasePricePerPlant: { type: number, minimum: 0 }
+        transportationCost:    { type: number, minimum: 0 }
+        otherCosts:            { type: number, minimum: 0 }
+        purchaseDate:          { type: string, format: date }
+        nurseryLocation:       { type: string, minLength: 1 }
+
+    PlantBatchUpdate:
+      type: object
+      properties:
+        batchNumber:           { type: string, minLength: 1 }
+        supplier:              { type: string, minLength: 1 }
+        plantId:               { type: integer }
+        potSize:               { type: string, minLength: 1 }
+        quantityPurchased:     { type: integer, minimum: 1 }
+        purchasePricePerPlant: { type: number, minimum: 0 }
+        transportationCost:    { type: number, minimum: 0 }
+        otherCosts:            { type: number, minimum: 0 }
+        purchaseDate:          { type: string, format: date }
+        currentQuantity:       { type: integer, minimum: 0 }
+        nurseryLocation:       { type: string, minLength: 1 }
+
+    # ── Production Batch schemas ────────────────────────────────────────────
+    ProductionBatchPlant:
+      type: object
+      required: [id, plantCode, commonName, botanicalName, potSize]
+      properties:
+        id:            { type: integer }
+        plantCode:     { type: string }
+        commonName:    { type: string }
+        botanicalName: { type: string }
+        potSize:       { type: string }
+        imageUrl:      { type: ["string", "null"] }
+
+    ProductionBatch:
+      type: object
+      required:
+        - id
+        - productionBatchNumber
+        - plantId
+        - plant
+        - productionType
+        - rootstockQuantity
+        - successfulPlants
+        - failedPlants
+        - laborCost
+        - potCost
+        - soilCost
+        - fertilizerCost
+        - chemicalCost
+        - waterCost
+        - otherCosts
+        - totalProductionCost
+        - costPerPlant
+        - nurseryLocation
+        - productionDate
+        - createdAt
+        - updatedAt
+      properties:
+        id:                    { type: integer }
+        productionBatchNumber: { type: string }
+        plantId:               { type: integer }
+        plant:
+          $ref: "#/components/schemas/ProductionBatchPlant"
+        productionType:        { type: string }
+        rootstockQuantity:     { type: integer }
+        successfulPlants:      { type: integer }
+        failedPlants:          { type: integer }
+        laborCost:             { type: number }
+        potCost:               { type: number }
+        soilCost:              { type: number }
+        fertilizerCost:        { type: number }
+        chemicalCost:          { type: number }
+        waterCost:             { type: number }
+        otherCosts:            { type: number }
+        totalProductionCost:   { type: number }
+        costPerPlant:          { type: number }
+        nurseryLocation:       { type: string }
+        productionDate:        { type: string, format: date }
+        createdAt:             { type: string, format: date-time }
+        updatedAt:             { type: string, format: date-time }
+
+    ProductionBatchInput:
+      type: object
+      required:
+        - plantId
+        - productionType
+        - rootstockQuantity
+        - successfulPlants
+        - productionDate
+        - nurseryLocation
+      properties:
+        productionBatchNumber: { type: string }
+        plantId:               { type: integer }
+        productionType:        { type: string, minLength: 1 }
+        rootstockQuantity:     { type: integer, minimum: 1 }
+        successfulPlants:      { type: integer, minimum: 0 }
+        failedPlants:          { type: integer, minimum: 0 }
+        laborCost:             { type: number, minimum: 0 }
+        potCost:               { type: number, minimum: 0 }
+        soilCost:              { type: number, minimum: 0 }
+        fertilizerCost:        { type: number, minimum: 0 }
+        chemicalCost:          { type: number, minimum: 0 }
+        waterCost:             { type: number, minimum: 0 }
+        otherCosts:            { type: number, minimum: 0 }
+        productionDate:        { type: string, format: date }
+        nurseryLocation:       { type: string, minLength: 1 }
+
+    ProductionBatchUpdate:
+      type: object
+      properties:
+        productionBatchNumber: { type: string, minLength: 1 }
+        plantId:               { type: integer }
+        productionType:        { type: string, minLength: 1 }
+        rootstockQuantity:     { type: integer, minimum: 1 }
+        successfulPlants:      { type: integer, minimum: 0 }
+        failedPlants:          { type: integer, minimum: 0 }
+        laborCost:             { type: number, minimum: 0 }
+        potCost:               { type: number, minimum: 0 }
+        soilCost:              { type: number, minimum: 0 }
+        fertilizerCost:        { type: number, minimum: 0 }
+        chemicalCost:          { type: number, minimum: 0 }
+        waterCost:             { type: number, minimum: 0 }
+        otherCosts:            { type: number, minimum: 0 }
+        productionDate:        { type: string, format: date }
+        nurseryLocation:       { type: string, minLength: 1 }
+
+    # ── Project schemas ──────────────────────────────────────────────────────
+    Project:
+      type: object
+      required:
+        - id
+        - projectCode
+        - projectName
+        - clientName
+        - projectLocation
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:              { type: integer }
+        projectCode:     { type: string }
+        projectName:     { type: string }
+        clientName:      { type: string }
+        projectLocation: { type: string }
+        status:          { type: string }
+        notes:           { type: ["string", "null"] }
+        createdAt:       { type: string, format: date-time }
+        updatedAt:       { type: string, format: date-time }
+
+    ProjectInput:
+      type: object
+      required: [projectName, clientName, projectLocation]
+      properties:
+        projectCode:     { type: string }
+        projectName:     { type: string, minLength: 1 }
+        clientName:      { type: string, minLength: 1 }
+        projectLocation: { type: string, minLength: 1 }
+        status:          { type: string }
+        notes:           { type: string }
+
+    ProjectUpdate:
+      type: object
+      properties:
+        projectCode:     { type: string, minLength: 1 }
+        projectName:     { type: string, minLength: 1 }
+        clientName:      { type: string, minLength: 1 }
+        projectLocation: { type: string, minLength: 1 }
+        status:          { type: string }
+        notes:           { type: string }
+
+    ProjectHistory:
+      type: object
+      required: [project, issues]
+      properties:
+        project:
+          $ref: "#/components/schemas/Project"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlantIssue"
+
+    # ── Available batches ────────────────────────────────────────────────────
+    # ── Inventory Item schemas ───────────────────────────────────────────────
+    InventoryItemPlant:
+      type: object
+      required: [id, plantCode, commonName, botanicalName, potSize]
+      properties:
+        id:            { type: integer }
+        plantCode:     { type: string }
+        commonName:    { type: string }
+        botanicalName: { type: string }
+        potSize:       { type: string }
+        imageUrl:      { type: string, nullable: true }
+
+    InventoryItem:
+      type: object
+      required:
+        - id
+        - plantId
+        - plant
+        - potSize
+        - nurseryLocation
+        - currentStock
+        - costPerPlant
+        - inventoryValue
+        - updatedAt
+      properties:
+        id:              { type: integer }
+        plantId:         { type: integer }
+        plant:
+          $ref: "#/components/schemas/InventoryItemPlant"
+        potSize:         { type: string }
+        nurseryLocation: { type: string }
+        currentStock:    { type: integer }
+        costPerPlant:    { type: number }
+        inventoryValue:  { type: number }
+        updatedAt:       { type: string, format: date-time }
+
+    InventoryPurchaseBatch:
+      type: object
+      required:
+        - batchNumber
+        - supplier
+        - purchaseDate
+        - quantityPurchased
+        - currentQuantity
+        - issuedQuantity
+        - costPerPlant
+        - totalBatchCost
+      properties:
+        batchNumber:       { type: string }
+        supplier:          { type: string }
+        purchaseDate:      { type: string, format: date }
+        quantityPurchased: { type: integer }
+        currentQuantity:   { type: integer }
+        issuedQuantity:    { type: integer }
+        costPerPlant:      { type: number }
+        totalBatchCost:    { type: number }
+
+    InventoryProductionBatch:
+      type: object
+      required:
+        - batchNumber
+        - productionType
+        - productionDate
+        - successfulPlants
+        - currentQuantity
+        - issuedQuantity
+        - costPerPlant
+        - totalProductionCost
+      properties:
+        batchNumber:         { type: string }
+        productionType:      { type: string }
+        productionDate:      { type: string, format: date }
+        successfulPlants:    { type: integer }
+        currentQuantity:     { type: integer }
+        issuedQuantity:      { type: integer }
+        costPerPlant:        { type: number }
+        totalProductionCost: { type: number }
+
+    InventoryDetail:
+      type: object
+      required:
+        - id
+        - plantId
+        - plant
+        - potSize
+        - nurseryLocation
+        - currentStock
+        - costPerPlant
+        - inventoryValue
+        - updatedAt
+        - purchaseBatches
+        - productionBatches
+      properties:
+        id:              { type: integer }
+        plantId:         { type: integer }
+        plant:
+          $ref: "#/components/schemas/InventoryItemPlant"
+        potSize:         { type: string }
+        nurseryLocation: { type: string }
+        currentStock:    { type: integer }
+        costPerPlant:    { type: number }
+        inventoryValue:  { type: number }
+        updatedAt:       { type: string, format: date-time }
+        purchaseBatches:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryPurchaseBatch"
+        productionBatches:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryProductionBatch"
+
+    InventoryMovementIssue:
+      type: object
+      required: [issueNumber, projectCode, projectName]
+      properties:
+        issueNumber: { type: string }
+        projectCode: { type: string }
+        projectName: { type: string }
+
+    InventoryMovementRecord:
+      type: object
+      required:
+        - id
+        - movementType
+        - batchNumber
+        - batchSource
+        - quantity
+        - costPerPlant
+        - totalCost
+        - movementDate
+      properties:
+        id:           { type: integer }
+        movementType: { type: string }
+        batchNumber:  { type: string }
+        batchSource:  { type: string }
+        quantity:     { type: integer }
+        costPerPlant: { type: number }
+        totalCost:    { type: number }
+        movementDate: { type: string, format: date }
+        plantIssueId: { type: integer, nullable: true }
+        plantIssue:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/InventoryMovementIssue"
+
+    PaginatedInventoryMovements:
+      type: object
+      required: [data, total, page, pageSize, totalPages]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryMovementRecord"
+        total:      { type: integer }
+        page:       { type: integer }
+        pageSize:   { type: integer }
+        totalPages: { type: integer }
+
+    AvailableBatch:
+      type: object
+      required:
+        - batchNumber
+        - batchSource
+        - plantId
+        - plant
+        - potSize
+        - nurseryLocation
+        - currentQuantity
+        - costPerPlant
+      properties:
+        batchNumber:     { type: string }
+        batchSource:     { type: string, enum: [PURCHASE, PRODUCTION] }
+        plantId:         { type: integer }
+        plant:
+          $ref: "#/components/schemas/ProductionBatchPlant"
+        potSize:         { type: string }
+        nurseryLocation: { type: string }
+        currentQuantity: { type: integer }
+        costPerPlant:    { type: number }
+
+    # ── Plant Issue schemas ──────────────────────────────────────────────────
+    PlantIssueProject:
+      type: object
+      required: [id, projectCode, projectName, clientName]
+      properties:
+        id:          { type: integer }
+        projectCode: { type: string }
+        projectName: { type: string }
+        clientName:  { type: string }
+
+    PlantIssueLine:
+      type: object
+      required:
+        - id
+        - plantId
+        - plant
+        - batchNumber
+        - batchSource
+        - potSize
+        - issueQuantity
+        - costPerPlant
+        - totalCost
+      properties:
+        id:            { type: integer }
+        plantId:       { type: integer }
+        plant:
+          $ref: "#/components/schemas/ProductionBatchPlant"
+        batchNumber:   { type: string }
+        batchSource:   { type: string, enum: [PURCHASE, PRODUCTION] }
+        potSize:       { type: string }
+        issueQuantity: { type: integer }
+        costPerPlant:  { type: number }
+        totalCost:     { type: number }
+
+    PlantIssue:
+      type: object
+      required:
+        - id
+        - issueNumber
+        - issueDate
+        - projectId
+        - project
+        - requestedBy
+        - issuedBy
+        - totalQuantity
+        - totalValue
+        - totalMaterialQuantity
+        - totalMaterialValue
+        - lines
+        - materialLines
+        - createdAt
+        - updatedAt
+      properties:
+        id:                    { type: integer }
+        issueNumber:           { type: string }
+        issueDate:             { type: string, format: date }
+        projectId:             { type: integer }
+        project:
+          $ref: "#/components/schemas/PlantIssueProject"
+        requestedBy:           { type: string }
+        issuedBy:              { type: string }
+        remarks:               { type: ["string", "null"] }
+        totalQuantity:         { type: integer }
+        totalValue:            { type: number }
+        totalMaterialQuantity: { type: number }
+        totalMaterialValue:    { type: number }
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlantIssueLine"
+        materialLines:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaterialIssueLine"
+        createdAt:             { type: string, format: date-time }
+        updatedAt:             { type: string, format: date-time }
+
+    PlantIssueLineInput:
+      type: object
+      required: [plantId, batchNumber, batchSource, potSize, issueQuantity]
+      properties:
+        plantId:       { type: integer }
+        batchNumber:   { type: string, minLength: 1 }
+        batchSource:   { type: string, enum: [PURCHASE, PRODUCTION] }
+        potSize:       { type: string, minLength: 1 }
+        issueQuantity: { type: integer, minimum: 1 }
+
+    PlantIssueInput:
+      type: object
+      required: [issueDate, projectId, requestedBy, issuedBy, lines]
+      properties:
+        issueNumber: { type: string }
+        issueDate:   { type: string, format: date }
+        projectId:   { type: integer }
+        requestedBy: { type: string, minLength: 1 }
+        issuedBy:    { type: string, minLength: 1 }
+        remarks:     { type: string }
+        lines:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/PlantIssueLineInput"
+        materialLines:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaterialIssueLineInput"
+
+    # ── Auth schemas ─────────────────────────────────────────────────────────
+    UserRole:
+      type: string
+      enum:
+        - Administrator
+        - Manager
+        - Accountant
+        - InventoryController
+        - NurseryStaff
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:    { type: string, format: email }
+        password: { type: string, minLength: 1 }
+
+    AuthUser:
+      type: object
+      required: [id, email, name, role, isActive, createdAt, updatedAt]
+      properties:
+        id:        { type: integer }
+        email:     { type: string }
+        name:      { type: string }
+        role:      { $ref: "#/components/schemas/UserRole" }
+        isActive:  { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    User:
+      type: object
+      required: [id, email, name, role, isActive, createdAt, updatedAt]
+      properties:
+        id:        { type: integer }
+        email:     { type: string }
+        name:      { type: string }
+        role:      { $ref: "#/components/schemas/UserRole" }
+        isActive:  { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    UserInput:
+      type: object
+      required: [email, name, role, password]
+      properties:
+        email:    { type: string, format: email }
+        name:     { type: string, minLength: 1 }
+        role:     { $ref: "#/components/schemas/UserRole" }
+        password: { type: string, minLength: 8 }
+
+    UserUpdate:
+      type: object
+      properties:
+        name:     { type: string, minLength: 1 }
+        role:     { $ref: "#/components/schemas/UserRole" }
+        password: { type: string, minLength: 8 }
+        isActive: { type: boolean }
+
+    AuditLogUser:
+      type: object
+      required: [id, name, email, role]
+      properties:
+        id:    { type: integer }
+        name:  { type: string }
+        email: { type: string }
+        role:  { $ref: "#/components/schemas/UserRole" }
+
+    AuditLog:
+      type: object
+      required: [id, action, entity, createdAt]
+      properties:
+        id:        { type: integer }
+        userId:    { type: integer, nullable: true }
+        user:      { $ref: "#/components/schemas/AuditLogUser", nullable: true }
+        action:    { type: string }
+        entity:    { type: string }
+        entityId:  { type: string, nullable: true }
+        details:   { type: string, nullable: true }
+        ipAddress: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    AuditLogPage:
+      type: object
+      required: [logs, total, limit, offset]
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        total:  { type: integer }
+        limit:  { type: integer }
+        offset: { type: integer }
+
+    # ── Material schemas ─────────────────────────────────────────────────────
+    MaterialMasterRef:
+      type: object
+      required: [id, materialCode, name, category, unit]
+      properties:
+        id:           { type: integer }
+        materialCode: { type: string }
+        name:         { type: string }
+        category:     { type: string }
+        unit:         { type: string }
+
+    MaterialMaster:
+      type: object
+      required: [id, materialCode, name, category, unit, createdAt, updatedAt]
+      properties:
+        id:           { type: integer }
+        materialCode: { type: string }
+        name:         { type: string }
+        category:     { type: string }
+        unit:         { type: string }
+        description:  { type: ["string", "null"] }
+        createdAt:    { type: string, format: date-time }
+        updatedAt:    { type: string, format: date-time }
+
+    MaterialMasterInput:
+      type: object
+      required: [name, category, unit]
+      properties:
+        name:        { type: string, minLength: 1 }
+        category:    { type: string, minLength: 1 }
+        unit:        { type: string, minLength: 1 }
+        description: { type: string }
+
+    MaterialMasterUpdate:
+      type: object
+      properties:
+        name:        { type: string, minLength: 1 }
+        category:    { type: string, minLength: 1 }
+        unit:        { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+
+    MaterialPurchase:
+      type: object
+      required:
+        - id
+        - purchaseNumber
+        - supplier
+        - materialId
+        - material
+        - quantity
+        - unit
+        - unitCost
+        - transportationCost
+        - otherCost
+        - totalCost
+        - purchaseDate
+        - stockLocation
+        - currentQuantity
+        - createdAt
+        - updatedAt
+      properties:
+        id:                 { type: integer }
+        purchaseNumber:     { type: string }
+        supplier:           { type: string }
+        materialId:         { type: integer }
+        material:
+          $ref: "#/components/schemas/MaterialMasterRef"
+        quantity:           { type: number }
+        unit:               { type: string }
+        unitCost:           { type: number }
+        transportationCost: { type: number }
+        otherCost:          { type: number }
+        totalCost:          { type: number }
+        purchaseDate:       { type: string, format: date }
+        stockLocation:      { type: string }
+        currentQuantity:    { type: number }
+        createdAt:          { type: string, format: date-time }
+        updatedAt:          { type: string, format: date-time }
+
+    MaterialPurchaseInput:
+      type: object
+      required: [supplier, materialId, quantity, unit, unitCost, purchaseDate, stockLocation]
+      properties:
+        supplier:           { type: string, minLength: 1 }
+        materialId:         { type: integer }
+        quantity:           { type: number, minimum: 0.001 }
+        unit:               { type: string, minLength: 1 }
+        unitCost:           { type: number, minimum: 0 }
+        transportationCost: { type: number, minimum: 0 }
+        otherCost:          { type: number, minimum: 0 }
+        purchaseDate:       { type: string, format: date }
+        stockLocation:      { type: string, minLength: 1 }
+
+    MaterialInventoryItem:
+      type: object
+      required:
+        - id
+        - materialId
+        - material
+        - stockLocation
+        - currentStock
+        - unit
+        - avgUnitCost
+        - inventoryValue
+        - updatedAt
+      properties:
+        id:             { type: integer }
+        materialId:     { type: integer }
+        material:
+          $ref: "#/components/schemas/MaterialMasterRef"
+        stockLocation:  { type: string }
+        currentStock:   { type: number }
+        unit:           { type: string }
+        avgUnitCost:    { type: number }
+        inventoryValue: { type: number }
+        updatedAt:      { type: string, format: date-time }
+
+    MaterialPurchaseBatch:
+      type: object
+      required:
+        - purchaseNumber
+        - supplier
+        - purchaseDate
+        - quantity
+        - currentQuantity
+        - issuedQuantity
+        - unitCost
+        - totalCost
+        - unit
+      properties:
+        purchaseNumber:  { type: string }
+        supplier:        { type: string }
+        purchaseDate:    { type: string, format: date }
+        quantity:        { type: number }
+        currentQuantity: { type: number }
+        issuedQuantity:  { type: number }
+        unitCost:        { type: number }
+        totalCost:       { type: number }
+        unit:            { type: string }
+
+    MaterialInventoryDetail:
+      type: object
+      required:
+        - id
+        - materialId
+        - material
+        - stockLocation
+        - currentStock
+        - unit
+        - avgUnitCost
+        - inventoryValue
+        - updatedAt
+        - purchases
+      properties:
+        id:             { type: integer }
+        materialId:     { type: integer }
+        material:
+          $ref: "#/components/schemas/MaterialMasterRef"
+        stockLocation:  { type: string }
+        currentStock:   { type: number }
+        unit:           { type: string }
+        avgUnitCost:    { type: number }
+        inventoryValue: { type: number }
+        updatedAt:      { type: string, format: date-time }
+        purchases:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaterialPurchaseBatch"
+
+    MaterialMovementIssue:
+      type: object
+      required: [issueNumber, projectCode, projectName]
+      properties:
+        issueNumber: { type: string }
+        projectCode: { type: string }
+        projectName: { type: string }
+
+    MaterialMovementRecord:
+      type: object
+      required:
+        - id
+        - movementType
+        - purchaseNumber
+        - quantity
+        - unitCost
+        - totalCost
+        - movementDate
+      properties:
+        id:             { type: integer }
+        movementType:   { type: string }
+        purchaseNumber: { type: string }
+        quantity:       { type: number }
+        unitCost:       { type: number }
+        totalCost:      { type: number }
+        movementDate:   { type: string, format: date }
+        plantIssueId:   { type: integer, nullable: true }
+        plantIssue:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/MaterialMovementIssue"
+
+    PaginatedMaterialMovements:
+      type: object
+      required: [data, total, page, pageSize, totalPages]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MaterialMovementRecord"
+        total:      { type: integer }
+        page:       { type: integer }
+        pageSize:   { type: integer }
+        totalPages: { type: integer }
+
+    AvailableMaterialPurchase:
+      type: object
+      required:
+        - purchaseNumber
+        - materialId
+        - material
+        - supplier
+        - stockLocation
+        - unit
+        - currentQuantity
+        - unitCost
+      properties:
+        purchaseNumber:  { type: string }
+        materialId:      { type: integer }
+        material:
+          $ref: "#/components/schemas/MaterialMasterRef"
+        supplier:        { type: string }
+        stockLocation:   { type: string }
+        unit:            { type: string }
+        currentQuantity: { type: number }
+        unitCost:        { type: number }
+
+    MaterialIssueLineInput:
+      type: object
+      required: [materialId, purchaseNumber, stockLocation, unit, issueQuantity]
+      properties:
+        materialId:     { type: integer }
+        purchaseNumber: { type: string, minLength: 1 }
+        stockLocation:  { type: string, minLength: 1 }
+        unit:           { type: string, minLength: 1 }
+        issueQuantity:  { type: number, minimum: 0.001 }
+
+    MaterialIssueLine:
+      type: object
+      required:
+        - id
+        - materialId
+        - material
+        - purchaseNumber
+        - stockLocation
+        - unit
+        - issueQuantity
+        - unitCost
+        - totalCost
+      properties:
+        id:             { type: integer }
+        materialId:     { type: integer }
+        material:
+          $ref: "#/components/schemas/MaterialMasterRef"
+        purchaseNumber: { type: string }
+        stockLocation:  { type: string }
+        unit:           { type: string }
+        issueQuantity:  { type: number }
+        unitCost:       { type: number }
+        totalCost:      { type: number }
+
+    # ── Dashboard schemas ────────────────────────────────────────────────────
+    TopProjectUsage:
+      type: object
+      required: [projectId, projectName, projectCode, totalQuantity, totalValue]
+      properties:
+        projectId:     { type: integer }
+        projectName:   { type: string }
+        projectCode:   { type: string }
+        totalQuantity: { type: integer }
+        totalValue:    { type: number }
+
+    DashboardSummary:
+      type: object
+      required:
+        - plantsIssuedToday
+        - plantsIssuedThisMonth
+        - inventoryValueIssuedThisMonth
+        - topProjects
+      properties:
+        plantsIssuedToday:             { type: integer }
+        plantsIssuedThisMonth:         { type: integer }
+        inventoryValueIssuedThisMonth: { type: number }
+        topProjects:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopProjectUsage"

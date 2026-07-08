@@ -1,0 +1,265 @@
+// Rosemary Nursery — Prisma Schema
+// Prisma v7: datasource url is configured in prisma.config.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  Administrator
+  Manager
+  Accountant
+  InventoryController
+  NurseryStaff
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  name         String
+  role         Role       @default(NurseryStaff)
+  passwordHash String
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model PlantMaster {
+  id             Int             @id @default(autoincrement())
+  plantCode      String          @unique
+  botanicalName  String
+  commonName     String
+  category       String
+  plantType      String
+  potSize        String
+  imageUrl       String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  batches         PlantBatch[]
+  inventoryItems  InventoryItem[]
+  productionBatches ProductionBatch[]
+  plantIssueLines PlantIssueLine[]
+  inventoryMovements InventoryMovement[]
+}
+
+model PlantBatch {
+  id                    Int         @id @default(autoincrement())
+  batchNumber           String      @unique
+  supplier              String
+  plantId               Int
+  plant                 PlantMaster @relation(fields: [plantId], references: [id])
+  potSize               String
+  quantityPurchased     Int
+  purchasePricePerPlant Decimal     @db.Decimal(12, 4)
+  transportationCost    Decimal     @default(0) @db.Decimal(12, 4)
+  otherCosts            Decimal     @default(0) @db.Decimal(12, 4)
+  totalBatchCost        Decimal     @db.Decimal(12, 4)
+  costPerPlant          Decimal     @db.Decimal(12, 4)
+  purchaseDate          DateTime    @db.Date
+  currentQuantity       Int
+  nurseryLocation       String
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+}
+
+model InventoryItem {
+  id              Int         @id @default(autoincrement())
+  plantId         Int
+  plant           PlantMaster @relation(fields: [plantId], references: [id])
+  potSize         String
+  nurseryLocation String
+  currentStock    Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([plantId, potSize, nurseryLocation])
+}
+
+model ProductionBatch {
+  id                     Int         @id @default(autoincrement())
+  productionBatchNumber  String      @unique
+  plantId                Int
+  plant                  PlantMaster @relation(fields: [plantId], references: [id])
+  productionType         String
+  rootstockQuantity      Int
+  successfulPlants       Int
+  failedPlants           Int         @default(0)
+  laborCost              Decimal     @default(0) @db.Decimal(12, 4)
+  potCost                Decimal     @default(0) @db.Decimal(12, 4)
+  soilCost               Decimal     @default(0) @db.Decimal(12, 4)
+  fertilizerCost         Decimal     @default(0) @db.Decimal(12, 4)
+  chemicalCost           Decimal     @default(0) @db.Decimal(12, 4)
+  waterCost              Decimal     @default(0) @db.Decimal(12, 4)
+  otherCosts             Decimal     @default(0) @db.Decimal(12, 4)
+  totalProductionCost    Decimal     @db.Decimal(12, 4)
+  costPerPlant           Decimal     @db.Decimal(12, 4)
+  currentQuantity        Int         @default(0)
+  nurseryLocation        String
+  productionDate         DateTime    @db.Date
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+}
+
+model Project {
+  id              Int          @id @default(autoincrement())
+  projectCode     String       @unique
+  projectName     String
+  clientName      String
+  projectLocation String
+  status          String       @default("Active")
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  plantIssues     PlantIssue[]
+}
+
+model PlantIssue {
+  id                      Int                 @id @default(autoincrement())
+  issueNumber             String              @unique
+  issueDate               DateTime            @db.Date
+  projectId               Int
+  project                 Project             @relation(fields: [projectId], references: [id])
+  requestedBy             String
+  issuedBy                String
+  remarks                 String?
+  totalQuantity           Int                 @default(0)
+  totalValue              Decimal             @default(0) @db.Decimal(12, 4)
+  totalMaterialQuantity   Decimal             @default(0) @db.Decimal(12, 4)
+  totalMaterialValue      Decimal             @default(0) @db.Decimal(12, 4)
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  lines                   PlantIssueLine[]
+  materialLines           MaterialIssueLine[]
+  inventoryMovements      InventoryMovement[]
+  materialMovements       MaterialMovement[]
+}
+
+model PlantIssueLine {
+  id            Int         @id @default(autoincrement())
+  plantIssueId  Int
+  plantIssue    PlantIssue  @relation(fields: [plantIssueId], references: [id], onDelete: Cascade)
+  plantId       Int
+  plant         PlantMaster @relation(fields: [plantId], references: [id])
+  batchNumber   String
+  batchSource   String
+  potSize       String
+  issueQuantity Int
+  costPerPlant  Decimal     @db.Decimal(12, 4)
+  totalCost     Decimal     @db.Decimal(12, 4)
+  createdAt     DateTime    @default(now())
+}
+
+model InventoryMovement {
+  id              Int         @id @default(autoincrement())
+  plantId         Int
+  plant           PlantMaster @relation(fields: [plantId], references: [id])
+  potSize         String
+  nurseryLocation String
+  batchNumber     String
+  batchSource     String
+  movementType    String
+  quantity        Int
+  costPerPlant    Decimal     @db.Decimal(12, 4)
+  totalCost       Decimal     @db.Decimal(12, 4)
+  plantIssueId    Int?
+  plantIssue      PlantIssue? @relation(fields: [plantIssueId], references: [id])
+  movementDate    DateTime    @db.Date
+  createdAt       DateTime    @default(now())
+}
+
+// ── Material Management ────────────────────────────────────────────────────────
+
+model MaterialMaster {
+  id             Int                 @id @default(autoincrement())
+  materialCode   String              @unique
+  name           String
+  category       String
+  unit           String
+  description    String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  purchases      MaterialPurchase[]
+  inventoryItems MaterialInventory[]
+  issueLines     MaterialIssueLine[]
+  movements      MaterialMovement[]
+}
+
+model MaterialPurchase {
+  id                 Int            @id @default(autoincrement())
+  purchaseNumber     String         @unique
+  supplier           String
+  materialId         Int
+  material           MaterialMaster @relation(fields: [materialId], references: [id])
+  quantity           Decimal        @db.Decimal(12, 4)
+  unit               String
+  unitCost           Decimal        @db.Decimal(12, 4)
+  transportationCost Decimal        @default(0) @db.Decimal(12, 4)
+  otherCost          Decimal        @default(0) @db.Decimal(12, 4)
+  totalCost          Decimal        @db.Decimal(12, 4)
+  purchaseDate       DateTime       @db.Date
+  stockLocation      String
+  currentQuantity    Decimal        @db.Decimal(12, 4)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model MaterialInventory {
+  id            Int            @id @default(autoincrement())
+  materialId    Int
+  material      MaterialMaster @relation(fields: [materialId], references: [id])
+  stockLocation String
+  currentStock  Decimal        @default(0) @db.Decimal(12, 4)
+  unit          String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([materialId, stockLocation])
+}
+
+model MaterialIssueLine {
+  id             Int            @id @default(autoincrement())
+  plantIssueId   Int
+  plantIssue     PlantIssue     @relation(fields: [plantIssueId], references: [id], onDelete: Cascade)
+  materialId     Int
+  material       MaterialMaster @relation(fields: [materialId], references: [id])
+  purchaseNumber String
+  stockLocation  String
+  unit           String
+  issueQuantity  Decimal        @db.Decimal(12, 4)
+  unitCost       Decimal        @db.Decimal(12, 4)
+  totalCost      Decimal        @db.Decimal(12, 4)
+  createdAt      DateTime       @default(now())
+}
+
+model MaterialMovement {
+  id             Int            @id @default(autoincrement())
+  materialId     Int
+  material       MaterialMaster @relation(fields: [materialId], references: [id])
+  stockLocation  String
+  purchaseNumber String
+  movementType   String
+  quantity       Decimal        @db.Decimal(12, 4)
+  unitCost       Decimal        @db.Decimal(12, 4)
+  totalCost      Decimal        @db.Decimal(12, 4)
+  plantIssueId   Int?
+  plantIssue     PlantIssue?    @relation(fields: [plantIssueId], references: [id])
+  movementDate   DateTime       @db.Date
+  createdAt      DateTime       @default(now())
+}

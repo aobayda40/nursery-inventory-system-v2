@@ -1,0 +1,157 @@
+Before writing any code, perform a complete analysis of the existing project.
+
+Read and understand:
+- replit.md
+- ROADMAP.md (if present)
+- package.json
+- pnpm-workspace.yaml
+- Prisma schema
+- OpenAPI specification
+- Backend architecture
+- Frontend architecture
+
+Tech Stack:
+
+Frontend:
+- React 18
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- TanStack Query
+- React Hook Form
+- Zod
+- Wouter
+- Recharts
+- Framer Motion
+
+Backend:
+- Express 5
+- Prisma 7
+- PostgreSQL
+- Pino logging
+- OpenAPI 3.1
+- Orval
+- Zod validation
+
+Current completed modules (DO NOT rebuild):
+
+✅ Dashboard
+✅ Plant Master
+✅ Purchased Plants
+✅ Production
+✅ Project Management
+✅ Plant Issue Tracking
+✅ Inventory Module
+
+Continue development from this existing codebase.
+
+==================================
+PHASE 1 – AUTHENTICATION & RBAC
+==================================
+
+Implement a complete authentication and authorization system.
+
+Roles:
+- Administrator
+- Manager
+- Accountant
+- Inventory Controller
+- Nursery Staff
+
+Backend:
+- User table
+- AuditLog table
+- JWT authentication
+- httpOnly cookie authentication
+- bcrypt password hashing
+- Login
+- Logout
+- Current user endpoint
+- Authentication middleware
+- Role authorization middleware
+- Permission helpers
+- Seed default Administrator
+
+Frontend:
+- Login page
+- Authentication Context
+- Protected Routes
+- User Profile page
+- User Management
+- Audit Log page
+- Role-based sidebar/menu visibility
+- Permission-based page access
+
+API:
+- Login
+- Logout
+- Current User
+- User CRUD
+- Audit Log endpoints
+
+==================================
+DEVELOPMENT RULES
+==================================
+
+Follow the existing architecture.
+
+Do NOT rewrite completed modules.
+
+Reuse existing components wherever possible.
+
+Generate and update:
+- Prisma schema
+- OpenAPI specification
+- Orval generated hooks
+
+Fix every TypeScript, Prisma, ESLint, and build error.
+
+Run:
+- pnpm install
+- Prisma commands
+- OpenAPI/Orval generation
+- pnpm build
+
+Do not stop until the project builds successfully with zero build errors.
+
+Test the application before finishing.
+
+Create or update ROADMAP.md and mark completed and pending tasks.
+
+==================================
+WORKFLOW REQUIREMENTS
+==================================
+
+Work in small logical milestones.
+
+After completing each milestone:
+1. Verify it works.
+2. Run the build.
+3. Fix any errors immediately.
+4. Commit the changes with a clear Git commit message.
+
+Do NOT leave the repository in a broken state.
+
+If the Replit session is about to end or credits are running low:
+
+1. Finish the current task.
+2. Run pnpm build.
+3. Fix any remaining errors.
+4. Commit all completed work.
+5. Push every commit to GitHub.
+6. Update ROADMAP.md with completed and remaining work.
+7. Update replit.md with implementation notes, important decisions, setup instructions, known issues, and the exact next task to continue.
+8. Provide a concise handoff summary explaining:
+   - What was completed
+   - What was changed
+   - What database changes were made
+   - What APIs were added
+   - What frontend pages were added
+   - Any remaining issues
+   - The exact next development step
+
+Never stop with uncommitted work.
+
+Never leave partially implemented features if they can be completed within the remaining session.
+
+Always make GitHub the latest working version before finishing.

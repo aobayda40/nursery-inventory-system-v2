@@ -1,0 +1,105 @@
+Enhance the existing Nursery Production Cost & Inventory System with a new module called "Plant Issue".
+
+This nursery does NOT sell plants to customers. Instead, plants are issued from the nursery to our own landscaping projects.
+
+Create a new module named "Plant Issue Voucher" with the following features:
+
+1. Project Master
+Create a simple Project Master table with:
+- Project Name
+- Client Name
+- Project Location
+- Status (Active / Completed)
+- Notes
+
+Allow:
+- Add Project
+- Edit Project
+- Delete Project
+- Search Projects
+
+2. Plant Issue
+Create a Plant Issue page.
+
+Header fields:
+- Issue Number (Auto-generated)
+- Issue Date
+- Project (Select from Project Master)
+- Requested By
+- Issued By
+- Remarks
+
+Issue Details:
+Allow multiple plant rows.
+
+Each row should contain:
+- Plant
+- Batch Number
+- Pot Size
+- Available Quantity
+- Issue Quantity
+- Cost Per Plant (Read-only)
+- Total Cost (Issue Quantity × Cost Per Plant)
+
+Requirements:
+- Only show inventory batches with available stock.
+- Prevent issuing more than the available quantity.
+- Automatically reduce inventory after saving.
+- Record every inventory movement in the inventory history.
+- Save the batch number so we know exactly which batch was issued.
+- Calculate the total quantity and total inventory value issued.
+
+3. Project History
+Each project should have a history page showing all issued plants with:
+- Issue Number
+- Date
+- Plant
+- Batch Number
+- Quantity
+- Cost Per Plant
+- Total Cost
+
+Display the total nursery cost issued to the project.
+
+4. Printable Issue Note
+Generate a professional printable Plant Issue Note.
+
+The report should include:
+- Company Name
+- Nursery Name
+- Issue Number
+- Issue Date
+- Project Name
+- Requested By
+- Issued By
+
+Table:
+- Plant Name
+- Pot Size
+- Batch Number
+- Quantity
+- Cost Per Plant
+- Total Cost
+
+At the bottom display:
+- Total Quantity
+- Total Inventory Value
+
+Include signature lines:
+- Requested By
+- Issued By
+- Received By
+
+Allow:
+- Print
+- Download as PDF
+- Reprint previous Issue Notes
+
+5. Dashboard
+Add dashboard cards:
+- Plants Issued Today
+- Plants Issued This Month
+- Inventory Value Issued This Month
+- Top Projects by Plant Usage
+
+Follow the existing project structure, database schema, coding style, and UI already implemented. Do not modify existing Purchase Plants, Production, or Inventory modules except where needed to support Project Plant Issue.

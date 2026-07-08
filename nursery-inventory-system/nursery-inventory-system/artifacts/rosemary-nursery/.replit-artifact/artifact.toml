@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Rosemary Nursery"
+version = "1.0.0"
+id = "artifacts/rosemary-nursery"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19556
+
+[services.env]
+PORT = "19556"
+BASE_PATH = "/"
+
+[services.development]
+run = "pnpm --filter @workspace/rosemary-nursery run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/rosemary-nursery", "run", "build" ]
+publicDir = "artifacts/rosemary-nursery/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

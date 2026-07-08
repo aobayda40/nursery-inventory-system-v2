@@ -1,0 +1,4 @@
+- [Auth & RBAC](auth-implementation.md) — JWT httpOnly cookie auth; global requireAuth at router level; Prisma config needs datasource.url for db push
+- [Port routing in Replit](port-routing.md) — port 8080 always maps to external port 80; frontend must run on 8080, API on 3000.
+- [Cookie auth via Vite proxy](cookie-auth-proxy.md) — do NOT use cookieDomainRewrite in Vite proxy; it breaks auth from non-localhost domains.
+- [Settings module architecture](settings-module.md) — flat key-value Setting table in Prisma; GET /api/settings open to all auth users, PUT restricted to Admin/Manager.
