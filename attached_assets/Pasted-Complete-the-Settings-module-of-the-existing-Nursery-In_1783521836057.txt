@@ -1,0 +1,142 @@
+Complete the Settings module of the existing Nursery Inventory Management System.
+
+Before making changes:
+
+* Analyze the current codebase structure.
+* Follow the existing architecture, UI components, API patterns, database models, authentication flow, and styling.
+* Do not rebuild existing modules.
+* Work only on the Settings functionality.
+
+Current project location:
+artifacts/rosemary-nursery
+
+The Settings page already exists:
+src/pages/settings.tsx
+
+Upgrade it into a complete enterprise-level settings module.
+
+## Settings Module Requirements
+
+### 1. Company Profile Settings
+
+Create a company profile section with:
+
+Fields:
+
+* Company Name
+* Company Logo
+* Address
+* Phone Number
+* Email
+* Website
+* VAT/Tax Number
+* Default Location
+
+Features:
+
+* Upload company logo
+* Preview uploaded logo
+* Save/update company information
+* Store settings persistently
+
+The logo should later be usable in:
+
+* Reports
+* Printable documents
+* Inventory documents
+
+---
+
+### 2. System Preferences
+
+Create system configuration settings:
+
+Fields:
+
+* Currency (default: SAR)
+* Date format
+* Time format
+* Number format
+* Default measurement units
+* Default language
+
+Make the values reusable across the application.
+
+---
+
+### 3. Inventory Settings
+
+Add inventory configuration:
+
+Options:
+
+* Enable low stock alerts
+* Low stock threshold value
+* Default stock calculation method
+* Allow negative inventory (Yes/No)
+* Default inventory location
+
+---
+
+### 4. User Profile Settings
+
+Create user account settings:
+
+* Display name
+* Email
+* Phone
+* Profile photo
+* Change password
+
+Use the existing authentication system.
+
+---
+
+### 5. Appearance / Branding
+
+Add:
+
+* Theme preference
+
+  * Light
+  * Dark
+  * System default
+
+* Primary branding color
+
+Keep it consistent with the existing application design.
+
+---
+
+### 6. Backup & Data Management
+
+Create a section for:
+
+* Export database/data
+* Export inventory records
+* Backup information
+* Last backup date display
+
+If full backup is not currently implemented:
+
+* Create the UI structure
+* Add placeholders with proper architecture for future API integration
+
+---
+
+### Technical Requirements
+
+* Use existing UI components from the project.
+* Use React Query/API hooks if already implemented.
+* Create backend routes/models only if required.
+* Validate all forms.
+* Show success/error notifications.
+* Make the page responsive.
+* Maintain professional ERP software style.
+
+After completing:
+
+1. Run the application.
+2. Fix all TypeScript/build errors.
+3. Verify settings save and load correctly.
+4. Provide a list of files changed and explain the implementation.
