@@ -197,6 +197,28 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary List the available report categories/definitions
+ */
+export const GetReportCategoriesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "group": zod.string()
+})
+export const GetReportCategoriesResponse = zod.array(GetReportCategoriesResponseItem)
+
+
+/**
+ * @summary Generate a report (placeholder — not implemented until Phase 2)
+ */
+export const GenerateReportParams = zod.object({
+  "reportId": zod.coerce.string()
+})
+
+export const GenerateReportResponse = zod.void()
+
+
+/**
  * @summary Get all application settings as a key/value map
  */
 export const GetSettingsResponse = zod.record(zod.string(), zod.string()).describe('Flat key\/value map of setting keys to string values.')

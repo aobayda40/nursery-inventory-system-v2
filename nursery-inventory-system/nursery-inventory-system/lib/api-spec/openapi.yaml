@@ -38,6 +38,8 @@ tags:
     description: Material inventory stock level operations
   - name: settings
     description: Application settings operations
+  - name: reports
+    description: Reports catalog and generation operations
 
 paths:
   # ── Auth ──────────────────────────────────────────────────────────────────
@@ -268,6 +270,47 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── Reports ───────────────────────────────────────────────────────────────
+  /reports/categories:
+    get:
+      operationId: getReportCategories
+      tags: [reports]
+      summary: List the available report categories/definitions
+      responses:
+        "200":
+          description: Report catalog
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReportDefinition"
+
+  /reports/{reportId}/generate:
+    get:
+      operationId: generateReport
+      tags: [reports]
+      summary: Generate a report (placeholder — not implemented until Phase 2)
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "501":
+          description: Report generation is not implemented yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Unknown report id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
 
   # ── Settings ──────────────────────────────────────────────────────────────
   /settings:
@@ -1497,6 +1540,15 @@ components:
       properties:
         error:
           type: string
+
+    ReportDefinition:
+      type: object
+      required: [id, name, description, group]
+      properties:
+        id:          { type: string }
+        name:        { type: string }
+        description: { type: string }
+        group:       { type: string }
 
     SettingsMap:
       type: object

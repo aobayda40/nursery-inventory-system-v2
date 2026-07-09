@@ -70,6 +70,7 @@ import type {
   ProjectHistory,
   ProjectInput,
   ProjectUpdate,
+  ReportDefinition,
   SettingsBackup,
   SettingsMap,
   User,
@@ -835,6 +836,160 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getHealthCheckQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetReportCategoriesUrl = () => {
+
+
+
+
+  return `/api/reports/categories`
+}
+
+/**
+ * @summary List the available report categories/definitions
+ */
+export const getReportCategories = async ( options?: RequestInit): Promise<ReportDefinition[]> => {
+
+  return customFetch<ReportDefinition[]>(getGetReportCategoriesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetReportCategoriesQueryKey = () => {
+    return [
+    `/api/reports/categories`
+    ] as const;
+    }
+
+
+export const getGetReportCategoriesQueryOptions = <TData = Awaited<ReturnType<typeof getReportCategories>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReportCategories>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetReportCategoriesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getReportCategories>>> = ({ signal }) => getReportCategories({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getReportCategories>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetReportCategoriesQueryResult = NonNullable<Awaited<ReturnType<typeof getReportCategories>>>
+export type GetReportCategoriesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List the available report categories/definitions
+ */
+
+export function useGetReportCategories<TData = Awaited<ReturnType<typeof getReportCategories>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getReportCategories>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetReportCategoriesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGenerateReportUrl = (reportId: string,) => {
+
+
+
+
+  return `/api/reports/${reportId}/generate`
+}
+
+/**
+ * @summary Generate a report (placeholder — not implemented until Phase 2)
+ */
+export const generateReport = async (reportId: string, options?: RequestInit): Promise<unknown> => {
+
+  return customFetch<unknown>(getGenerateReportUrl(reportId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGenerateReportQueryKey = (reportId: string,) => {
+    return [
+    `/api/reports/${reportId}/generate`
+    ] as const;
+    }
+
+
+export const getGenerateReportQueryOptions = <TData = Awaited<ReturnType<typeof generateReport>>, TError = ErrorType<ApiError>>(reportId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof generateReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGenerateReportQueryKey(reportId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof generateReport>>> = ({ signal }) => generateReport(reportId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: reportId !== null && reportId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof generateReport>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GenerateReportQueryResult = NonNullable<Awaited<ReturnType<typeof generateReport>>>
+export type GenerateReportQueryError = ErrorType<ApiError>
+
+
+/**
+ * @summary Generate a report (placeholder — not implemented until Phase 2)
+ */
+
+export function useGenerateReport<TData = Awaited<ReturnType<typeof generateReport>>, TError = ErrorType<ApiError>>(
+ reportId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof generateReport>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGenerateReportQueryOptions(reportId,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

@@ -13,6 +13,13 @@ export interface ApiError {
   error: string;
 }
 
+export interface ReportDefinition {
+  id: string;
+  name: string;
+  description: string;
+  group: string;
+}
+
 /**
  * Flat key/value map of setting keys to string values.
  */

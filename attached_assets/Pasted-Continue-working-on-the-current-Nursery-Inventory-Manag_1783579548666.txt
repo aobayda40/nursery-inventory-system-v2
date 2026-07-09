@@ -1,0 +1,95 @@
+Continue working on the current Nursery Inventory Management System.
+
+Treat the current workspace as the source of truth.
+
+The Settings module is fully completed, tested, and pushed to GitHub. Do not modify or recreate any completed modules.
+
+Before writing code, thoroughly analyze the existing project architecture, routing, backend APIs, database schema, UI components, authentication, permissions, and coding standards.
+
+Follow the existing architecture exactly.
+
+Your task is to implement ONLY the Reports Module Foundation.
+
+==========================
+PHASE 1 - REPORTS FOUNDATION
+==========================
+
+Create the complete Reports module foundation without implementing every report yet.
+
+Frontend:
+- Create the Reports page.
+- Add Reports navigation/menu entry if not already present.
+- Create a professional enterprise report dashboard layout.
+- Use the existing design system (shadcn/ui, Tailwind, existing components).
+- Match the styling of Dashboard and Settings.
+
+Layout:
+- Report Categories section
+- Quick Reports cards
+- Date Range Filter
+- Custom Date Picker
+- Branch/Location Filter (if applicable)
+- Export toolbar
+- Print button
+- Refresh button
+- Search/filter area
+- Responsive layout
+
+Report Cards (UI only for now):
+- Inventory Reports
+- Stock Movement Reports
+- Purchase Reports
+- Sales Reports
+- Supplier Reports
+- Low Stock Reports
+- Plant Category Reports
+- Material Usage Reports
+
+Backend:
+- Create the Reports API structure.
+- Create reusable report service architecture.
+- Add placeholder endpoints for future reports.
+- Follow existing Express + Prisma + Zod architecture.
+- Keep APIs modular.
+
+Permissions:
+- Administrator: Full access
+- Manager: Full reports
+- Staff: Read-only reports if already supported by project roles
+
+Prepare reusable utilities for:
+- PDF export
+- Excel export
+- CSV export
+- Printing
+
+Do not fully implement exports yet.
+Create reusable infrastructure only.
+
+Requirements:
+- No placeholder demo data.
+- No duplicate components.
+- No breaking changes.
+- No modifications to Inventory, Dashboard, Authentication, or Settings unless absolutely required.
+- Follow the existing coding style exactly.
+
+Before finishing:
+1. Run TypeScript checks.
+2. Fix all errors.
+3. Restart workflows if required.
+4. Verify routing works.
+5. Verify Reports page loads successfully.
+6. Verify responsive UI.
+7. Verify role protection.
+
+At the end provide:
+
+- Files created
+- Files modified
+- Architecture summary
+- What was completed
+- What remains for Phase 2
+
+DO NOT START PHASE 2.
+
+Stop after the Reports Foundation is complete.
