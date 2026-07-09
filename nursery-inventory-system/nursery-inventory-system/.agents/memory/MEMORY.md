@@ -1,1 +1,4 @@
-- [Auth & RBAC](auth-implementation.md) — JWT httpOnly cookie auth; global requireAuth at router level; Prisma config needs datasource.url for db push
+- [Settings key/value design](settings-kv-design.md) — Setting model uses string PK key/value; server-side ALLOWED_KEYS allow-list enforces namespace; no migration needed for new keys.
+- [Orval codegen pipeline](orval-codegen.md) — hand-edit openapi.yaml then run `pnpm --filter @workspace/api-spec run codegen`; zod schemas named like UpdateSettingsBody not SettingsMap.
+- [Vite Fast Refresh in context files](vite-fast-refresh.md) — context files must not export non-component constants alongside components; move constants to a separate module file.
+- [Form reset guard pattern](form-reset-guard.md) — guard useEffect resets with `!form.formState.isDirty` to avoid clobbering in-progress edits on settings refresh.

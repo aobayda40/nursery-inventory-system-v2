@@ -59,7 +59,9 @@ export function CompanySection() {
   });
 
   useEffect(() => {
-    if (!isLoading) {
+    // Only reset when not dirty — avoids clobbering in-progress edits
+    // when settings refresh (e.g. after another tab saves).
+    if (!isLoading && !form.formState.isDirty) {
       form.reset({
         name: settings["company.name"] ?? "",
         logo: settings["company.logo"] || null,

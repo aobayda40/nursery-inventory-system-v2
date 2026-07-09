@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -61,7 +61,7 @@ export function SystemSection() {
   });
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && !form.formState.isDirty) {
       form.reset({
         currency: settings["system.currency"] || "SAR",
         dateFormat: settings["system.dateFormat"] || "DD/MM/YYYY",

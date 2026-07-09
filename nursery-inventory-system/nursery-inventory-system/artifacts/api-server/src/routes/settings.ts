@@ -70,6 +70,13 @@ router.put(
       return;
     }
 
+    // Guard against oversized base64 logo uploads (~2 MB limit for base64 = ~1.5 MB decoded).
+    const logoEntry = parsed.data["company.logo"];
+    if (logoEntry && logoEntry.length > 2_800_000) {
+      res.status(400).json({ error: "company.logo exceeds the 2 MB limit. Please resize the image before uploading." });
+      return;
+    }
+
     await prisma.$transaction(
       entries.map(([key, value]) =>
         prisma.setting.upsert({

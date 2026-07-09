@@ -85,15 +85,25 @@ export function BackupSection() {
   };
 
   const handleExportPlants = async () => {
-    const { data } = await refetchPlants();
-    downloadCsv(`plant-master-${new Date().toISOString().slice(0, 10)}.csv`, (data ?? []) as unknown as Record<string, unknown>[]);
-    toast({ title: "Inventory records exported", description: "Plant Master records have been downloaded as CSV." });
+    try {
+      const { data } = await refetchPlants();
+      if (!data) throw new Error("No data returned");
+      downloadCsv(`plant-master-${new Date().toISOString().slice(0, 10)}.csv`, data as unknown as Record<string, unknown>[]);
+      toast({ title: "Plant Master exported", description: "Plant catalog has been downloaded as CSV." });
+    } catch {
+      toast({ title: "Export failed", description: "Could not export plant records. Please try again.", variant: "destructive" });
+    }
   };
 
   const handleExportMaterials = async () => {
-    const { data } = await refetchMaterials();
-    downloadCsv(`material-master-${new Date().toISOString().slice(0, 10)}.csv`, (data ?? []) as unknown as Record<string, unknown>[]);
-    toast({ title: "Inventory records exported", description: "Material Master records have been downloaded as CSV." });
+    try {
+      const { data } = await refetchMaterials();
+      if (!data) throw new Error("No data returned");
+      downloadCsv(`material-master-${new Date().toISOString().slice(0, 10)}.csv`, data as unknown as Record<string, unknown>[]);
+      toast({ title: "Material Master exported", description: "Material catalog has been downloaded as CSV." });
+    } catch {
+      toast({ title: "Export failed", description: "Could not export material records. Please try again.", variant: "destructive" });
+    }
   };
 
   const handleImportClick = () => fileInputRef.current?.click();

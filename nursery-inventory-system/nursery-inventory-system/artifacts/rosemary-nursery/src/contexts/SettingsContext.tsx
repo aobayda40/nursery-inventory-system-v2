@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useCallback,
+  useEffect,
   useMemo,
   type ReactNode,
 } from "react";
@@ -13,32 +14,7 @@ import {
   type SettingsMap,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-
-/** Defaults shown until the server responds / for keys never saved. */
-export const SETTINGS_DEFAULTS: SettingsMap = {
-  "company.name": "Rosemary Nursery",
-  "company.logo": "",
-  "company.address": "",
-  "company.phone": "",
-  "company.email": "",
-  "company.website": "",
-  "company.taxNumber": "",
-  "company.defaultLocation": "",
-  "system.currency": "SAR",
-  "system.dateFormat": "DD/MM/YYYY",
-  "system.timeFormat": "24h",
-  "system.numberFormat": "1,234.56",
-  "system.units": "Metric",
-  "system.language": "English",
-  "inventory.lowStockAlertsEnabled": "true",
-  "inventory.lowStockThreshold": "10",
-  "inventory.stockCalculationMethod": "FIFO",
-  "inventory.allowNegativeInventory": "false",
-  "inventory.defaultLocation": "",
-  "appearance.theme": "system",
-  "appearance.primaryColor": "#166534",
-  "backup.lastBackupDate": "",
-};
+import { SETTINGS_DEFAULTS } from "@/features/settings/settings-defaults";
 
 interface SettingsContextValue {
   /** Effective settings: server values merged over defaults. */
@@ -63,6 +39,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     () => ({ ...SETTINGS_DEFAULTS, ...(data ?? {}) }),
     [data],
   );
+
+  // Apply the persisted theme as soon as settings load from the server.
+  useEffect(() => {
+    if (data?.["appearance.theme"]) {
+      setTheme(data["appearance.theme"]);
+    }
+  }, [data, setTheme]);
 
   const updateSettings = useUpdateSettings({
     mutation: {

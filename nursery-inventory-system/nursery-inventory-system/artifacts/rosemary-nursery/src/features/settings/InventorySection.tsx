@@ -53,7 +53,7 @@ export function InventorySection() {
   });
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && !form.formState.isDirty) {
       form.reset({
         lowStockAlertsEnabled: settings["inventory.lowStockAlertsEnabled"] !== "false",
         lowStockThreshold: Number(settings["inventory.lowStockThreshold"] || 10),

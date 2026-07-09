@@ -46,7 +46,7 @@ export function AppearanceSection() {
   });
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && !form.formState.isDirty) {
       const theme = (settings["appearance.theme"] as AppearanceFormValues["theme"]) || "system";
       form.reset({
         theme,
